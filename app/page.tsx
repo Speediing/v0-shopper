@@ -7,7 +7,7 @@ import Image from "next/image"
 
 import { PromptInput, PromptInputSubmit, PromptInputTextarea } from "@/components/ai-elements/prompt-input"
 import { Message, MessageContent } from "@/components/ai-elements/message"
-import { Conversation, ConversationContent } from "@/components/ai-elements/conversation"
+import { ConversationContent } from "@/components/ai-elements/conversation"
 import { WebPreview, WebPreviewNavigation, WebPreviewUrl, WebPreviewBody } from "@/components/ai-elements/web-preview"
 import { Loader } from "@/components/ai-elements/loader"
 import { Suggestions, Suggestion } from "@/components/ai-elements/suggestion"
@@ -157,15 +157,13 @@ export default function Home() {
             </div>
           ) : (
             <>
-              <Conversation>
-                <ConversationContent>
-                  {chatHistory.map((msg, index) => (
-                    <Message from={msg.type} key={index}>
-                      <MessageContent>{msg.content}</MessageContent>
-                    </Message>
-                  ))}
-                </ConversationContent>
-              </Conversation>
+              <ConversationContent>
+                {chatHistory.map((msg, index) => (
+                  <Message from={msg.type} key={index}>
+                    <MessageContent>{msg.content}</MessageContent>
+                  </Message>
+                ))}
+              </ConversationContent>
               {isLoading && (
                 <Message from="assistant">
                   <MessageContent>
