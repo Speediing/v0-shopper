@@ -1,6 +1,6 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Geist, Manrope } from "next/font/google"
+import { Geist, Geist_Mono } from "next/font/google"
 import "./globals.css"
 
 const geistSans = Geist({
@@ -8,14 +8,14 @@ const geistSans = Geist({
   subsets: ["latin"],
 })
 
-const manrope = Manrope({
-  variable: "--font-manrope",
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
   subsets: ["latin"],
 })
 
 export const metadata: Metadata = {
-  title: "Toast Website Creator",
-  description: "Create beautiful restaurant websites and online ordering experiences with Toast",
+  title: "Shopify Store Vibe - Coding Platform",
+  description: "Build amazing Shopify stores with AI-powered code generation",
     generator: 'v0.app'
 }
 
@@ -26,7 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${manrope.variable} font-sans antialiased`}>{children}</body>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>{children}</body>
     </html>
   )
 }

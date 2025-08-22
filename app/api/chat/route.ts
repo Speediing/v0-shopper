@@ -21,9 +21,27 @@ export async function POST(request: NextRequest) {
         message,
       });
     } else {
-const chat = await v0.chats.create({
-  message: message
-})
+      // create new chat
+      const project = await v0.projects.create({
+        name: "My Project",
+        environmentVariables: [
+          {
+            key: "NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN",
+            value: "fakestore-ai.myshopify.com",
+          },
+        ],
+      });
+
+      chat = await v0.chats.init({
+  type: 'zip',
+  zip: {
+    url: 'https://oml7wvjso7dfbgel.public.blob.vercel-storage.com/v0commercetemplateshopify.zip'
+  },
+      });
+      const result = await v0.projects.assign({
+        projectId: project.id,
+        chatId: chat.id,
+      });
     }
 
     return NextResponse.json({

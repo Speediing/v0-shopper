@@ -3,6 +3,7 @@
 import type React from "react"
 
 import { useState } from "react"
+import Image from "next/image"
 
 import { PromptInput, PromptInputSubmit, PromptInputTextarea } from "@/components/ai-elements/prompt-input"
 import { Message, MessageContent } from "@/components/ai-elements/message"
@@ -20,6 +21,7 @@ export default function Home() {
   const [message, setMessage] = useState("")
   const [currentChat, setCurrentChat] = useState<Chat | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [hasStarted, setHasStarted] = useState(false)
   const [chatHistory, setChatHistory] = useState<
     Array<{
       type: "user" | "assistant"
@@ -60,7 +62,7 @@ export default function Home() {
         ...prev,
         {
           type: "assistant",
-          content: "Generated new restaurant website preview. Check the preview panel!",
+          content: "Generated new app preview. Check the preview panel!",
         },
       ])
     } catch (error) {
@@ -69,7 +71,55 @@ export default function Home() {
         ...prev,
         {
           type: "assistant",
-          content: "Sorry, there was an error creating your restaurant website. Please try again.",
+          content: "Sorry, there was an error creating your app. Please try again.",
+        },
+      ])
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleStartChat = async () => {
+    const initialMessage = "Let's build a Shopify store!"
+    setHasStarted(true)
+    setMessage("")
+    setIsLoading(true)
+
+    setChatHistory([{ type: "user", content: initialMessage }])
+
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: initialMessage,
+          chatId: null,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to create chat")
+      }
+
+      const chat: Chat = await response.json()
+      setCurrentChat(chat)
+
+      setChatHistory((prev) => [
+        ...prev,
+        {
+          type: "assistant",
+          content: "Generated new app preview. Check the preview panel!",
+        },
+      ])
+    } catch (error) {
+      console.error("Error:", error)
+      setChatHistory((prev) => [
+        ...prev,
+        {
+          type: "assistant",
+          content: "Sorry, there was an error creating your app. Please try again.",
         },
       ])
     } finally {
@@ -78,36 +128,32 @@ export default function Home() {
   }
 
   return (
-    <div className="h-screen flex bg-background">
+    <div className="h-screen flex">
       {/* Chat Panel */}
-      <div className="w-1/2 flex flex-col border-r border-border">
+      <div className="w-1/2 flex flex-col border-r">
         {/* Header */}
-        <div className="border-b border-border p-4 h-16 flex items-center justify-between bg-card">
+        <div className="border-b p-3 h-14 flex items-center justify-between bg-primary/5">
           <div className="flex items-center gap-3">
-            <img src="/toast-logo.png" alt="Toast" className="h-8 w-auto" />
-            <h1 className="text-xl font-semibold text-foreground">Website Creator</h1>
+            <Image src="/shopify-logo.png" alt="Shopify" width={48} height={48} className="object-contain" />
+            <h1 className="text-lg font-semibold text-primary">Vibe Coding Platform </h1>
           </div>
-          <div className="text-sm text-muted-foreground">Build your restaurant's online presence</div>
+          <div className="text-sm text-muted-foreground font-medium">{""}</div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {chatHistory.length === 0 ? (
-            <div className="text-center mt-12">
-              <div className="mb-6">
-                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                    <svg className="w-5 h-5 text-primary-foreground" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                    </svg>
-                  </div>
-                </div>
-                <h2 className="text-3xl font-bold text-foreground mb-2">
-                  What restaurant experience can we build together?
-                </h2>
-                <p className="text-muted-foreground text-lg">
-                  Create stunning websites and online ordering experiences that drive revenue for your restaurant
-                </p>
+            <div className="text-center font-semibold mt-8">
+              <div className="flex justify-center mb-6">
+                <Image
+                  src="/shopify-logo.png"
+                  alt="Shopify"
+                  width={64}
+                  height={64}
+                  className="object-contain opacity-80"
+                />
               </div>
+              <p className="text-3xl mt-4 text-primary">What Shopify store can we build together?</p>
+              <p className="text-muted-foreground mt-2">Create stunning e-commerce experiences with AI</p>
             </div>
           ) : (
             <>
@@ -125,7 +171,7 @@ export default function Home() {
                   <MessageContent>
                     <p className="flex items-center gap-2">
                       <Loader />
-                      Creating your restaurant website...
+                      Creating your Shopify store...
                     </p>
                   </MessageContent>
                 </Message>
@@ -135,38 +181,52 @@ export default function Home() {
         </div>
 
         {/* Input */}
-        <div className="border-t border-border p-6 bg-card">
-          {!currentChat && (
-            <Suggestions>
-              <Suggestion
-                onClick={() => setMessage("Create a modern pizza restaurant website with online ordering")}
-                suggestion="Create a modern pizza restaurant website with online ordering"
-              />
-              <Suggestion
-                onClick={() => setMessage("Build a coffee shop landing page with menu showcase")}
-                suggestion="Build a coffee shop landing page with menu showcase"
-              />
-              <Suggestion
-                onClick={() => setMessage("Design a fine dining restaurant site with reservation system")}
-                suggestion="Design a fine dining restaurant site with reservation system"
-              />
-            </Suggestions>
+        <div className="border-t p-4">
+          {!currentChat && !hasStarted ? (
+            <div className="flex justify-center">
+              <button
+                type="button"
+                onClick={handleStartChat}
+                className="px-8 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
+              >
+                Start
+              </button>
+            </div>
+          ) : (
+            <>
+              {!currentChat && hasStarted && (
+                <Suggestions>
+                  <Suggestion
+                    onClick={() => setMessage("Create a modern product page for a Shopify store")}
+                    suggestion="Create a modern product page for a Shopify store"
+                  />
+                  <Suggestion
+                    onClick={() => setMessage("Build a shopping cart component with Shopify styling")}
+                    suggestion="Build a shopping cart component with Shopify styling"
+                  />
+                  <Suggestion
+                    onClick={() => setMessage("Make a hero section for an e-commerce landing page")}
+                    suggestion="Make a hero section for an e-commerce landing page"
+                  />
+                </Suggestions>
+              )}
+              <div className="flex gap-2">
+                <PromptInput onSubmit={handleSendMessage} className="mt-4 w-full max-w-2xl mx-auto relative">
+                  <PromptInputTextarea
+                    onChange={(e) => setMessage(e.target.value)}
+                    value={message}
+                    className="pr-12 min-h-[60px]"
+                    placeholder="Describe your Shopify store component..."
+                  />
+                  <PromptInputSubmit
+                    className="absolute bottom-1 right-1"
+                    disabled={!message}
+                    status={isLoading ? "streaming" : "ready"}
+                  />
+                </PromptInput>
+              </div>
+            </>
           )}
-          <div className="flex gap-2">
-            <PromptInput onSubmit={handleSendMessage} className="mt-4 w-full max-w-2xl mx-auto relative">
-              <PromptInputTextarea
-                onChange={(e) => setMessage(e.target.value)}
-                value={message}
-                className="pr-12 min-h-[60px]"
-                placeholder="Describe your restaurant website idea..."
-              />
-              <PromptInputSubmit
-                className="absolute bottom-1 right-1"
-                disabled={!message}
-                status={isLoading ? "streaming" : "ready"}
-              />
-            </PromptInput>
-          </div>
         </div>
       </div>
 
@@ -174,12 +234,25 @@ export default function Home() {
       <div className="w-1/2 flex flex-col">
         <WebPreview>
           <WebPreviewNavigation>
-            <WebPreviewUrl
-              placeholder="Your restaurant website preview will appear here..."
-              value={currentChat?.demo}
-            />
+            <WebPreviewUrl placeholder="Your Shopify store preview..." readOnly value={currentChat?.demo || ""} />
           </WebPreviewNavigation>
-          <WebPreviewBody src={currentChat?.demo} />
+          {currentChat?.demo ? (
+            <WebPreviewBody src={currentChat.demo} />
+          ) : (
+            <div className="flex-1 flex items-center justify-center bg-muted/20">
+              <div className="text-center text-muted-foreground">
+                <Image
+                  src="/shopify-logo.png"
+                  alt="Shopify"
+                  width={48}
+                  height={48}
+                  className="object-contain opacity-50 mx-auto mb-4"
+                />
+                <p className="text-lg font-medium">No preview yet</p>
+                <p className="text-sm">Start building your Shopify store component</p>
+              </div>
+            </div>
+          )}
         </WebPreview>
       </div>
     </div>
